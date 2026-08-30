@@ -33,8 +33,8 @@ pipeline {
 
         stage('Lint & Quality') {
             steps {
-                // Flag --env removida para compatibilidade com a versão atual do ESLint
-                sh 'npx eslint src/'
+                // Ativa o modo legado para aceitar .eslintrc sem quebrar nas versões novas do ESLint
+                sh 'ESLINT_USE_FLAT_CONFIG=false npx eslint src/'
             }
         }
 
