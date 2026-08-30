@@ -1,14 +1,12 @@
 pipeline {
     agent any
 
-    // 1. Triggers: Ativação automática via Push (Requisito da Atividade)
-    triggers {
-        pollSCM('* * * * *') // Verificação periódica ou integração com Webhook
+    tools {
+        nodejs 'NodeJS'
     }
 
-    // 2. Tools: Garante que o Node.js esteja configurado no Jenkins
-    tools {
-        nodejs 'NodeJS' // Nome da ferramenta configurada no painel do Jenkins
+    triggers {
+        githubPush()
     }
 
     stages {
@@ -18,27 +16,25 @@ pipeline {
             }
         }
 
-        stage('Build & Install') {
+        stage('Install Dependencies') {
             steps {
                 sh 'npm ci'
             }
         }
 
-        stage('SAST (Security)') {
+        stage('SAST - Security Audit') {
             steps {
-                // Trata o retorno para evitar que vulnerabilidades baixas brequem a esteira se necessário
                 sh 'npm audit --audit-level=high'
             }
         }
 
         stage('Lint & Quality') {
             steps {
-                // Ativa o modo legado para aceitar .eslintrc sem quebrar nas versões novas do ESLint
-                sh 'ESLINT_USE_FLAT_CONFIG=false npx eslint src/'
+                sh 'npm run lint'
             }
         }
 
-        stage('Testes') {
+        stage('Tests') {
             steps {
                 sh 'npm test'
             }
@@ -47,14 +43,13 @@ pipeline {
 
     post {
         always {
-            cleanWs() // Limpa o workspace após a execução
+            cleanWs()
         }
-        // 3. Notificações de log solicitadas no enunciado
         success {
-            echo 'Pipeline executada com sucesso!'
+            echo 'Pipeline do Jenkins executada com sucesso!'
         }
         failure {
-            echo 'A pipeline falhou em um dos estágios de verificação.'
+            echo 'A pipeline do Jenkins falhou em algum estágio.'
         }
     }
 }
