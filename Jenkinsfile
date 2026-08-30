@@ -33,7 +33,8 @@ pipeline {
 
         stage('Lint & Quality') {
             steps {
-                sh 'npx eslint src/ --env node'
+                // Flag --env removida para compatibilidade com a versão atual do ESLint
+                sh 'npx eslint src/'
             }
         }
 
